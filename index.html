@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b3d2e" />
+    <title>האוטובוס הבא • Next Bus</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <div class="title">האוטובוס הבא 🚌</div>
+      <div class="subtitle">זמני האוטובוסים הקרובים לתחנה הקרובה אליך</div>
+
+      <div id="error" class="error" hidden></div>
+
+      <!-- Initial state: locate button -->
+      <section id="start">
+        <button id="locate" class="refresh">מצא תחנה קרובה</button>
+        <p class="muted" style="margin-top: 16px">
+          לחצו על הכפתור ואשרו גישה למיקום כדי לראות אילו קווים מגיעים לתחנה
+          הקרובה ובעוד כמה דקות.
+        </p>
+      </section>
+
+      <!-- Results state -->
+      <section id="results" hidden>
+        <div id="stop-card" class="stop-card"></div>
+        <div id="arrivals"></div>
+
+        <div class="other-stops">
+          <h3>תחנות נוספות בקרבת מקום</h3>
+          <div id="chips"></div>
+        </div>
+
+        <button id="refresh-loc" class="refresh" style="margin-top: 16px">
+          רענן מיקום
+        </button>
+      </section>
+
+      <div class="footer">
+        זמן אמת דרך ה־API הציבורי של
+        <a href="https://bus.gov.il" target="_blank" rel="noreferrer">bus.gov.il</a>
+        (משרד התחבורה) · לוח זמנים מגיבוי
+        <a href="https://github.com/hasadna/open-bus" target="_blank" rel="noreferrer"
+          >תחבורה ציבורית פתוחה</a
+        >
+      </div>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
