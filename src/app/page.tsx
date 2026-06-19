@@ -22,7 +22,7 @@ interface Arrival {
 
 interface ArrivalsResult {
   stopCode: number;
-  source: "siri" | "schedule";
+  source: "realtime" | "siri" | "schedule";
   arrivals: Arrival[];
 }
 
@@ -139,10 +139,14 @@ export default function Page() {
                 {Math.round(selected.distanceMeters)} מ׳ ממך
               </div>
               {result && (
-                <span className={`source-badge ${result.source}`}>
-                  {result.source === "siri"
-                    ? "● זמן אמת"
-                    : "● לפי לוח זמנים"}
+                <span
+                  className={`source-badge ${
+                    result.source === "schedule" ? "schedule" : "live"
+                  }`}
+                >
+                  {result.source === "schedule"
+                    ? "● לפי לוח זמנים"
+                    : "● זמן אמת"}
                 </span>
               )}
             </div>

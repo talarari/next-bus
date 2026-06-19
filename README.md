@@ -13,14 +13,18 @@ your current location** in Israel, with how many minutes away each one is.
 | Layer | Source | Key required |
 | --- | --- | --- |
 | Nearest stop search | Bundled `data/stops.json` (~30k stops, generated from the open [Open Bus / Stride API](https://open-bus-stride-api.hasadna.org.il/docs)) | No |
-| Upcoming arrivals (default) | Published GTFS schedule via [Open Bus / Stride](https://github.com/hasadna/open-bus) `gtfs_ride_stops` | No |
-| Live arrivals (optional) | Ministry of Transport **SIRI** Stop Monitoring | Yes |
+| **Live arrivals (default)** | Ministry of Transport public passenger API ([bus.gov.il](https://bus.gov.il)) `GetRealtimeBusLineListByBustop` | **No** |
+| Live arrivals (alt) | Ministry of Transport **SIRI** Stop Monitoring | Yes |
+| Arrivals fallback | Published GTFS schedule via [Open Bus / Stride](https://github.com/hasadna/open-bus) `gtfs_ride_stops` | No |
 
-Out of the box the app shows **scheduled** arrivals (the open data is forward
--looking for the current service day). If you configure a Ministry of Transport
-SIRI user code, it switches to **live** predictions and falls back to the
-schedule automatically if a live request fails. Each result is labelled
-`● זמן אמת` (live) or `● לפי לוח זמנים` (schedule).
+Out of the box the app shows **real-time** arrivals with **no key** — it uses
+the same public `bus.gov.il` endpoint that powers the official MoT journey
+planner, which returns live minutes-to-arrival per line. Stop codes there are
+standard GTFS stop codes, so the bundled stop list feeds straight into it.
+
+The provider chain (see `src/lib/transit/index.ts`) is: public real-time
+→ SIRI (only if a key is configured) → published schedule. Each result is
+labelled `● זמן אמת` (live) or `● לפי לוח זמנים` (schedule).
 
 ## Getting started
 

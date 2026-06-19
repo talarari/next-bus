@@ -15,6 +15,6 @@ export interface Arrival {
 
 export interface ArrivalsResult {
   stopCode: number;
-  source: "siri" | "schedule";
+  source: "realtime" | "siri" | "schedule";
   arrivals: Arrival[];
 }
