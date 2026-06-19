@@ -34,7 +34,18 @@
 
         <div class="other-stops">
           <h3>בחרו תחנה קרובה</h3>
-          <select id="stop-select" class="stop-select"></select>
+          <div id="stop-dropdown" class="dropdown">
+            <button
+              id="stop-toggle"
+              class="dropdown-toggle"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+            >
+              <span class="dropdown-label"></span>
+            </button>
+            <ul id="stop-menu" class="dropdown-menu" role="listbox" hidden></ul>
+          </div>
         </div>
 
         <div id="arrivals"></div>

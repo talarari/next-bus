@@ -85,8 +85,13 @@ function run({ permissionState, expectView }) {
       assert(visible(expectView), `${expectView} view is visible`);
 
       if (expectView === "results") {
-        const opts = d.querySelectorAll("#stop-select option");
-        assert(opts.length >= 2, `stop dropdown populated (${opts.length} options)`);
+        const opts = d.querySelectorAll("#stop-menu .dropdown-item");
+        assert(opts.length >= 2, `stop dropdown populated (${opts.length} items)`);
+
+        const toggle = d
+          .querySelector("#stop-toggle .dropdown-label")
+          .textContent.trim();
+        assert(toggle.length > 0, `dropdown toggle shows a stop (${toggle})`);
 
         const rows = d.querySelectorAll("li.arrival");
         assert(rows.length === 3, `3 arrival rows rendered (got ${rows.length})`);
@@ -104,6 +109,20 @@ function run({ permissionState, expectView }) {
 
         const badge = d.querySelector(".source-badge");
         assert(badge && badge.textContent.includes("זמן אמת"), "live badge shown");
+
+        // In-app dropdown opens inline and selecting a stop updates the toggle.
+        const click = () => new window.MouseEvent("click", { bubbles: true });
+        d.getElementById("stop-toggle").dispatchEvent(click());
+        assert(!d.getElementById("stop-menu").hidden, "dropdown opens inline on click");
+
+        const second = d.querySelectorAll("#stop-menu .dropdown-item")[1];
+        const secondLabel = second.textContent.trim();
+        second.dispatchEvent(click());
+        assert(d.getElementById("stop-menu").hidden, "dropdown closes after selecting");
+        const newToggle = d
+          .querySelector("#stop-toggle .dropdown-label")
+          .textContent.trim();
+        assert(newToggle === secondLabel, `toggle updates to picked stop`);
       }
       resolve();
     }, 150);

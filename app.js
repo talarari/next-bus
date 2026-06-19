@@ -187,23 +187,50 @@ function renderArrivals(result, loading) {
     "</ul>";
 }
 
-function renderStopSelect() {
-  el("stop-select").innerHTML = nearby
-    .map((s) => {
-      const label = `${s.name || "תחנה " + s.code} · ${Math.round(
-        s.distanceMeters
-      )} מ׳`;
-      const sel = selected?.code === s.code ? " selected" : "";
-      return `<option value="${s.code}"${sel}>${label}</option>`;
-    })
+function stopLabel(s) {
+  return `${s.name || "תחנה " + s.code} · ${Math.round(s.distanceMeters)} מ׳`;
+}
+
+function closeDropdown() {
+  el("stop-dropdown").classList.remove("open");
+  el("stop-menu").hidden = true;
+  el("stop-toggle").setAttribute("aria-expanded", "false");
+}
+
+function toggleDropdown() {
+  const open = el("stop-dropdown").classList.toggle("open");
+  el("stop-menu").hidden = !open;
+  el("stop-toggle").setAttribute("aria-expanded", String(open));
+}
+
+function renderStopDropdown() {
+  el("stop-toggle").querySelector(".dropdown-label").textContent = selected
+    ? stopLabel(selected)
+    : "בחרו תחנה";
+  el("stop-menu").innerHTML = nearby
+    .map(
+      (s) =>
+        `<li class="dropdown-item${
+          selected?.code === s.code ? " active" : ""
+        }" role="option" data-code="${s.code}">${stopLabel(s)}</li>`
+    )
     .join("");
+  el("stop-menu")
+    .querySelectorAll(".dropdown-item")
+    .forEach((li) =>
+      li.addEventListener("click", () => {
+        const stop = nearby.find((s) => s.code === Number(li.dataset.code));
+        closeDropdown();
+        if (stop && stop.code !== selected?.code) selectStop(stop);
+      })
+    );
 }
 
 /* ---------- flow ---------- */
 
 async function selectStop(stop) {
   selected = stop;
-  renderStopSelect();
+  renderStopDropdown();
   renderStopCard(stop, null);
   renderArrivals(null, true);
   await refreshArrivals();
@@ -265,30 +292,39 @@ function locate() {
         if (btn2) btn2.disabled = false;
       }
     },
-    () => {
+    (err) => {
+      // Fall back to the button. Only surface a message if the user actively
+      // denied access — never as the first impression on load.
       showView("start");
-      showError("לא ניתן לקבל גישה למיקום. אשרו הרשאת מיקום ונסו שוב.");
+      if (err && err.code === err.PERMISSION_DENIED) {
+        showError("לא ניתן לקבל גישה למיקום. אשרו הרשאת מיקום ונסו שוב.");
+      }
       if (btn2) btn2.disabled = false;
     },
-    { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 }
+    { enableHighAccuracy: true, timeout: 8_000, maximumAge: 300_000 }
   );
 }
 
 el("locate").addEventListener("click", locate);
 el("refresh-loc").addEventListener("click", locate);
-el("stop-select").addEventListener("change", (e) => {
-  const stop = nearby.find((s) => s.code === Number(e.target.value));
-  if (stop) selectStop(stop);
+el("stop-toggle").addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleDropdown();
+});
+document.addEventListener("click", (e) => {
+  if (!el("stop-dropdown").contains(e.target)) closeDropdown();
 });
 
 // Auto-locate on open ONLY if permission is already granted — browsers ignore
 // a geolocation request made without a user gesture, which would hang forever.
-// Otherwise show the button so the tap provides the required gesture.
+// The Permissions API check is instant (no prompt, no network), so a first-time
+// visitor sees the button right away instead of waiting for a failure.
 async function init() {
   try {
     if (navigator.permissions && navigator.permissions.query) {
       const p = await navigator.permissions.query({ name: "geolocation" });
       if (p.state === "granted") {
+        showView("loading");
         locate();
         return;
       }
