@@ -10,6 +10,13 @@
   "orientation": "portrait",
   "background_color": "#0b1320",
   "theme_color": "#0b1320",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://talarari.github.io/next-bus/manifest.webmanifest"
+    }
+  ],
   "icons": [
     {
       "src": "./icons/icon-192.png",

@@ -407,8 +407,18 @@ window.addEventListener("pageshow", (e) => {
 /* ---------- install to home screen (PWA) ---------- */
 
 function isStandalone() {
-  const mm = window.matchMedia && window.matchMedia("(display-mode: standalone)");
-  return (mm && mm.matches) || window.navigator.standalone === true;
+  const mm = window.matchMedia;
+  if (mm) {
+    for (const m of ["standalone", "minimal-ui", "fullscreen"]) {
+      if (mm(`(display-mode: ${m})`).matches) return true;
+    }
+  }
+  if (window.navigator.standalone === true) return true; // iOS
+  // Android WebAPK launches set the referrer to android-app://...
+  if (document.referrer && document.referrer.startsWith("android-app://")) {
+    return true;
+  }
+  return false;
 }
 
 function isIOS() {
@@ -493,6 +503,20 @@ if (window.matchMedia) {
 }
 
 refreshInstallUI();
+
+// Android: confirm via the platform whether our PWA is already installed,
+// so the button hides even when viewing in a normal browser tab.
+if (navigator.getInstalledRelatedApps) {
+  navigator
+    .getInstalledRelatedApps()
+    .then((apps) => {
+      if (apps && apps.length) {
+        markInstalled();
+        refreshInstallUI();
+      }
+    })
+    .catch(() => {});
+}
 
 // Service worker: required for the install prompt and enables offline use.
 if ("serviceWorker" in navigator) {
