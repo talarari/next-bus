@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0b3d2e" />
     <title>האוטובוס הבא • Next Bus</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=__VERSION__" />
   </head>
   <body>
     <main>
@@ -33,7 +33,12 @@
         <div id="stop-card" class="stop-card"></div>
 
         <div class="other-stops">
-          <h3>בחרו תחנה קרובה</h3>
+          <div class="stops-header">
+            <h3>בחרו תחנה קרובה</h3>
+            <button id="refresh-loc" class="relocate" type="button">
+              📍 עדכון מיקום
+            </button>
+          </div>
           <div id="stop-dropdown" class="dropdown">
             <button
               id="stop-toggle"
@@ -54,10 +59,6 @@
         </div>
 
         <div id="arrivals"></div>
-
-        <button id="refresh-loc" class="refresh" style="margin-top: 16px">
-          רענן מיקום
-        </button>
       </section>
 
       <div class="footer">
@@ -70,6 +71,6 @@
       </div>
     </main>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=__VERSION__"></script>
   </body>
 </html>

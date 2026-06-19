@@ -280,11 +280,42 @@ button.refresh:disabled {
   margin: 0 0 18px;
 }
 
+.stops-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 8px;
+}
+
 .other-stops h3 {
   font-size: 13px;
   color: var(--muted);
   font-weight: 600;
-  margin: 0 0 8px;
+  margin: 0;
+}
+
+.relocate {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.relocate:hover {
+  color: var(--text);
+}
+
+.relocate:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .dropdown {

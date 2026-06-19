@@ -20,7 +20,7 @@ let lastUpdated = null;
 
 async function loadStops() {
   if (stops.length) return stops;
-  const res = await fetch("./data/stops.json");
+  const res = await fetch("./data/stops.json?v=__VERSION__");
   if (!res.ok) throw new Error("stops dataset failed to load");
   const raw = await res.json();
   // {c,n,y,x,city} -> {code,name,lat,lon,city}
