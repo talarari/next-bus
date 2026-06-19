@@ -3,14 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0b3d2e" />
+    <meta name="theme-color" content="#0b1320" />
     <title>האוטובוס הבא • Next Bus</title>
+    <link rel="manifest" href="./manifest.webmanifest?v=__VERSION__" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon-180.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="האוטובוס הבא" />
     <link rel="stylesheet" href="./styles.css?v=__VERSION__" />
   </head>
   <body>
     <main>
       <div class="title">האוטובוס הבא 🚌</div>
       <div class="subtitle">זמני האוטובוסים הקרובים לתחנה הקרובה אליך</div>
+
+      <button id="install" class="install-btn" hidden>
+        📲 הוספה למסך הבית
+      </button>
+      <div id="ios-hint" class="ios-hint" hidden>
+        להתקנה: הקישו על <b>שיתוף</b> ⬆️ ואז על <b>הוספה למסך הבית</b>.
+      </div>
 
       <div id="error" class="error" hidden></div>
 

@@ -28,7 +28,7 @@ jobs:
       - name: Cache-bust asset URLs
         # Replace the __VERSION__ placeholder with this commit's SHA so every
         # deploy serves fresh styles.css / app.js / stops.json (no stale cache).
-        run: sed -i "s/__VERSION__/${GITHUB_SHA}/g" index.html app.js
+        run: sed -i "s/__VERSION__/${GITHUB_SHA}/g" index.html app.js sw.js
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

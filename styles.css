@@ -237,6 +237,42 @@ button.refresh:disabled {
   font-size: 14px;
 }
 
+.install-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(24, 169, 87, 0.12);
+  border: 1px solid rgba(24, 169, 87, 0.55);
+  color: var(--accent-2);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 999px;
+  padding: 9px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.install-btn:hover {
+  background: rgba(24, 169, 87, 0.22);
+}
+
+.install-btn:active {
+  transform: translateY(1px);
+}
+
+.ios-hint {
+  background: var(--card);
+  border: 1px solid #222d45;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
 .error {
   background: rgba(220, 80, 80, 0.12);
   border: 1px solid rgba(220, 80, 80, 0.4);

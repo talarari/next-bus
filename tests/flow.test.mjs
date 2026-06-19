@@ -126,6 +126,11 @@ function run({ permissionState, expectView }) {
           `auto-refresh indicator shown (${rsText})`
         );
 
+        assert(
+          d.getElementById("install").hidden,
+          "install button hidden until installable"
+        );
+
         // In-app dropdown opens inline and selecting a stop updates the toggle.
         const click = () => new window.MouseEvent("click", { bubbles: true });
         d.getElementById("stop-toggle").dispatchEvent(click());

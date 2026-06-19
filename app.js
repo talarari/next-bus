@@ -399,3 +399,56 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("pageshow", (e) => {
   if (e.persisted) onResume();
 });
+
+/* ---------- install to home screen (PWA) ---------- */
+
+function isStandalone() {
+  const mm = window.matchMedia && window.matchMedia("(display-mode: standalone)");
+  return (mm && mm.matches) || window.navigator.standalone === true;
+}
+
+function isIOS() {
+  return (
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    // iPadOS reports as Mac but has touch
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+let deferredPrompt = null;
+const installBtn = el("install");
+
+// Android/Chrome: capture the prompt and offer a one-tap install.
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!isStandalone()) installBtn.hidden = false;
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredPrompt = null;
+  installBtn.hidden = true;
+  el("ios-hint").hidden = true;
+});
+
+installBtn.addEventListener("click", async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    installBtn.hidden = true;
+  } else if (isIOS()) {
+    // iOS Safari has no install API — show the manual steps.
+    el("ios-hint").hidden = !el("ios-hint").hidden;
+  }
+});
+
+// iOS can't fire beforeinstallprompt, so surface the button there too.
+if (isIOS() && !isStandalone()) installBtn.hidden = false;
+
+// Service worker: required for the install prompt and enables offline use.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
