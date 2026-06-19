@@ -71,5 +71,7 @@ npm run build:stops        # node scripts/build-stops.mjs
 ## Credits
 
 Real-time data originates from the Israel Ministry of Transport. Schedule data
-and the open pipeline are by the
-[Public Knowledge Workshop — Open Bus project (hasadna)](https://github.com/hasadna/open-bus).
+and the stops dataset come from the Public Knowledge Workshop's actively
+maintained [Open Bus Stride API](https://open-bus-stride-api.hasadna.org.il/docs)
+(the legacy `hasadna/open-bus` analysis repo is archived; Stride is the current
+platform).
