@@ -231,15 +231,23 @@ async function refreshArrivals() {
   }
 }
 
+function showView(name) {
+  el("loading").hidden = name !== "loading";
+  el("start").hidden = name !== "start";
+  el("results").hidden = name !== "results";
+}
+
 function locate() {
   showError("");
-  const btn = el("locate");
   const btn2 = el("refresh-loc");
-  [btn, btn2].forEach((b) => b && (b.disabled = true));
+  if (btn2) btn2.disabled = true;
+  // Keep current results visible on re-locate; otherwise show the loader.
+  if (el("results").hidden) showView("loading");
 
   if (!("geolocation" in navigator)) {
+    showView("start");
     showError("הדפדפן לא תומך באיתור מיקום.");
-    [btn, btn2].forEach((b) => b && (b.disabled = false));
+    if (btn2) btn2.disabled = false;
     return;
   }
 
@@ -250,24 +258,26 @@ function locate() {
         const { latitude, longitude } = pos.coords;
         nearby = findNearbyStops(latitude, longitude, 6);
         if (!nearby.length) {
+          showView("start");
           showError("לא נמצאו תחנות בקרבת מקום.");
           return;
         }
-        el("start").hidden = true;
-        el("results").hidden = false;
+        showView("results");
         await selectStop(nearby[0]);
         if (refreshTimer) clearInterval(refreshTimer);
         refreshTimer = setInterval(refreshArrivals, REFRESH_MS);
       } catch (e) {
         console.error(e);
+        showView("start");
         showError("שגיאה באיתור תחנות קרובות.");
       } finally {
-        [btn, btn2].forEach((b) => b && (b.disabled = false));
+        if (btn2) btn2.disabled = false;
       }
     },
     () => {
+      showView("start");
       showError("לא ניתן לקבל גישה למיקום. אשרו הרשאת מיקום ונסו שוב.");
-      [btn, btn2].forEach((b) => b && (b.disabled = false));
+      if (btn2) btn2.disabled = false;
     },
     { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 }
   );
@@ -275,3 +285,6 @@ function locate() {
 
 el("locate").addEventListener("click", locate);
 el("refresh-loc").addEventListener("click", locate);
+
+// Auto-locate on open so arrivals show immediately (prompts for permission).
+locate();

@@ -14,12 +14,17 @@
 
       <div id="error" class="error" hidden></div>
 
-      <!-- Initial state: locate button -->
-      <section id="start">
+      <!-- Loading state: shown immediately while we locate + fetch -->
+      <section id="loading">
+        <p class="muted">מאתר מיקום וזמני אוטובוסים<span class="spinner"></span></p>
+      </section>
+
+      <!-- Fallback: shown only if location access is denied/unavailable -->
+      <section id="start" hidden>
         <button id="locate" class="refresh">מצא תחנה קרובה</button>
         <p class="muted" style="margin-top: 16px">
-          לחצו על הכפתור ואשרו גישה למיקום כדי לראות אילו קווים מגיעים לתחנה
-          הקרובה ובעוד כמה דקות.
+          אשרו גישה למיקום כדי לראות אילו קווים מגיעים לתחנה הקרובה ובעוד כמה
+          דקות.
         </p>
       </section>
 
