@@ -5,6 +5,10 @@
   "description": "Live next-bus arrivals at the nearest Israeli bus stop — a fully client-side static app, no key required.",
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "build:stops": "node scripts/build-stops.mjs"
+    "build:stops": "node scripts/build-stops.mjs",
+    "test": "node tests/flow.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
   }
 }

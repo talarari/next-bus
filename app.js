@@ -187,32 +187,23 @@ function renderArrivals(result, loading) {
     "</ul>";
 }
 
-function renderChips() {
-  el("chips").innerHTML = nearby
-    .map(
-      (s) =>
-        `<span class="chip ${selected?.code === s.code ? "active" : ""}" data-code="${
-          s.code
-        }">${(s.name || "תחנה " + s.code).slice(0, 22)} · ${Math.round(
-          s.distanceMeters
-        )} מ׳</span>`
-    )
+function renderStopSelect() {
+  el("stop-select").innerHTML = nearby
+    .map((s) => {
+      const label = `${s.name || "תחנה " + s.code} · ${Math.round(
+        s.distanceMeters
+      )} מ׳`;
+      const sel = selected?.code === s.code ? " selected" : "";
+      return `<option value="${s.code}"${sel}>${label}</option>`;
+    })
     .join("");
-  el("chips")
-    .querySelectorAll(".chip")
-    .forEach((c) =>
-      c.addEventListener("click", () => {
-        const stop = nearby.find((s) => s.code === Number(c.dataset.code));
-        if (stop) selectStop(stop);
-      })
-    );
 }
 
 /* ---------- flow ---------- */
 
 async function selectStop(stop) {
   selected = stop;
-  renderChips();
+  renderStopSelect();
   renderStopCard(stop, null);
   renderArrivals(null, true);
   await refreshArrivals();
@@ -285,6 +276,27 @@ function locate() {
 
 el("locate").addEventListener("click", locate);
 el("refresh-loc").addEventListener("click", locate);
+el("stop-select").addEventListener("change", (e) => {
+  const stop = nearby.find((s) => s.code === Number(e.target.value));
+  if (stop) selectStop(stop);
+});
 
-// Auto-locate on open so arrivals show immediately (prompts for permission).
-locate();
+// Auto-locate on open ONLY if permission is already granted — browsers ignore
+// a geolocation request made without a user gesture, which would hang forever.
+// Otherwise show the button so the tap provides the required gesture.
+async function init() {
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      const p = await navigator.permissions.query({ name: "geolocation" });
+      if (p.state === "granted") {
+        locate();
+        return;
+      }
+    }
+  } catch (_) {
+    /* Permissions API unavailable — fall through to the button. */
+  }
+  showView("start");
+}
+
+init();
