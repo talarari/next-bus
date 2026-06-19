@@ -394,9 +394,13 @@ async function onResume() {
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") onResume();
+  if (document.visibilityState === "visible") {
+    refreshInstallUI();
+    onResume();
+  }
 });
 window.addEventListener("pageshow", (e) => {
+  refreshInstallUI();
   if (e.persisted) onResume();
 });
 
@@ -418,15 +422,47 @@ function isIOS() {
 let deferredPrompt = null;
 const installBtn = el("install");
 
+function markInstalled() {
+  try {
+    localStorage.setItem("pwa-installed", "1");
+  } catch (_) {
+    /* private mode — fine */
+  }
+}
+
+function alreadyInstalled() {
+  try {
+    if (localStorage.getItem("pwa-installed") === "1") return true;
+  } catch (_) {
+    /* ignore */
+  }
+  return isStandalone();
+}
+
+// Decide whether to show the install button. Hidden once installed (standalone
+// launch, the appinstalled event, or the remembered flag), so it doesn't keep
+// nagging after the user added it to the home screen.
+function refreshInstallUI() {
+  if (alreadyInstalled()) {
+    installBtn.hidden = true;
+    el("ios-hint").hidden = true;
+    return;
+  }
+  if (deferredPrompt || (isIOS() && !isStandalone())) {
+    installBtn.hidden = false;
+  }
+}
+
 // Android/Chrome: capture the prompt and offer a one-tap install.
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  if (!isStandalone()) installBtn.hidden = false;
+  refreshInstallUI();
 });
 
 window.addEventListener("appinstalled", () => {
   deferredPrompt = null;
+  markInstalled();
   installBtn.hidden = true;
   el("ios-hint").hidden = true;
 });
@@ -443,8 +479,20 @@ installBtn.addEventListener("click", async () => {
   }
 });
 
-// iOS can't fire beforeinstallprompt, so surface the button there too.
-if (isIOS() && !isStandalone()) installBtn.hidden = false;
+// iOS can't detect installation, so let the user dismiss the prompt for good.
+el("ios-dismiss").addEventListener("click", () => {
+  markInstalled();
+  el("ios-hint").hidden = true;
+  installBtn.hidden = true;
+});
+
+// Re-check when the display mode flips to standalone (i.e. just installed).
+if (window.matchMedia) {
+  const mq = window.matchMedia("(display-mode: standalone)");
+  (mq.addEventListener || mq.addListener)?.call(mq, "change", refreshInstallUI);
+}
+
+refreshInstallUI();
 
 // Service worker: required for the install prompt and enables offline use.
 if ("serviceWorker" in navigator) {

@@ -131,6 +131,24 @@ function run({ permissionState, expectView }) {
           "install button hidden until installable"
         );
 
+        // Install button shows on prompt, then stays gone after install.
+        window.dispatchEvent(new window.Event("beforeinstallprompt"));
+        assert(
+          !d.getElementById("install").hidden,
+          "install button shows on beforeinstallprompt"
+        );
+        window.dispatchEvent(new window.Event("appinstalled"));
+        assert(
+          d.getElementById("install").hidden &&
+            window.localStorage.getItem("pwa-installed") === "1",
+          "install button hidden and remembered after install"
+        );
+        window.dispatchEvent(new window.Event("beforeinstallprompt"));
+        assert(
+          d.getElementById("install").hidden,
+          "install button stays hidden after install"
+        );
+
         // In-app dropdown opens inline and selecting a stop updates the toggle.
         const click = () => new window.MouseEvent("click", { bubbles: true });
         d.getElementById("stop-toggle").dispatchEvent(click());
