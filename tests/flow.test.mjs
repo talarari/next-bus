@@ -50,13 +50,20 @@ function run({ permissionState, expectView }) {
     const { window } = dom;
 
     // --- mocks ---
+    let geoCalls = 0;
     window.navigator.geolocation = {
-      getCurrentPosition: (ok) =>
+      getCurrentPosition: (ok) => {
+        geoCalls++;
         setTimeout(
           () => ok({ coords: { latitude: 32.0837, longitude: 34.795 } }),
           0
-        ),
+        );
+      },
     };
+    // Controllable clock so we can simulate the page going stale.
+    let nowOffset = 0;
+    const realNow = Date.now;
+    window.Date.now = () => realNow() + nowOffset;
     window.navigator.permissions = {
       query: async () => ({ state: permissionState }),
     };
@@ -76,8 +83,10 @@ function run({ permissionState, expectView }) {
     script.textContent = appJs;
     window.document.body.appendChild(script);
 
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
     // Let the async chain settle.
-    setTimeout(() => {
+    setTimeout(async () => {
       const d = window.document;
       const visible = (id) => !d.getElementById(id).hidden;
 
@@ -130,6 +139,32 @@ function run({ permissionState, expectView }) {
           .querySelector("#stop-toggle .dropdown-label")
           .textContent.trim();
         assert(newToggle === secondLabel, `toggle updates to picked stop`);
+
+        const pageshow = () => {
+          const ev = new window.Event("pageshow");
+          Object.defineProperty(ev, "persisted", { value: true });
+          window.dispatchEvent(ev);
+        };
+
+        // Short return (minutes later): must NOT re-locate, only refresh times.
+        const beforeShort = geoCalls;
+        nowOffset = 3 * 60_000; // 3 minutes
+        pageshow();
+        await wait(30);
+        assert(
+          geoCalls === beforeShort,
+          `short return keeps the stop, no re-locate (geo calls stayed ${geoCalls})`
+        );
+
+        // Long absence (hours later): re-detects location.
+        const beforeLong = geoCalls;
+        nowOffset = 2 * 60 * 60 * 1000; // 2 hours
+        pageshow();
+        await wait(30);
+        assert(
+          geoCalls === beforeLong + 1,
+          `long absence re-detects location (geo calls ${beforeLong} -> ${geoCalls})`
+        );
       }
       resolve();
     }, 150);

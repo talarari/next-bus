@@ -366,3 +366,36 @@ async function init() {
 }
 
 init();
+
+// The page is often reopened later from a different place (left open since
+// yesterday, restored from bfcache, or refocused after a long while). On resume
+// only re-detect location after a LONG absence — glancing at times, waiting at
+// the stop, and coming back a minute later must not move you off your stop. For
+// short returns we just refresh the times for the current stop.
+const RELOCATE_AFTER_MS = 60 * 60 * 1000; // 1 hour
+
+async function onResume() {
+  if (el("results").hidden) return; // nothing shown yet
+  const longGone = !lastUpdated || Date.now() - lastUpdated > RELOCATE_AFTER_MS;
+  if (longGone) {
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const p = await navigator.permissions.query({ name: "geolocation" });
+        if (p.state === "granted") {
+          locate(); // re-detect position -> current nearest stop + fresh times
+          return;
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  refreshArrivals(); // short return: just refresh times for the current stop
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") onResume();
+});
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) onResume();
+});
