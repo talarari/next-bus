@@ -110,6 +110,13 @@ function run({ permissionState, expectView }) {
         const badge = d.querySelector(".source-badge");
         assert(badge && badge.textContent.includes("זמן אמת"), "live badge shown");
 
+        const rs = d.getElementById("refresh-status");
+        const rsText = d.getElementById("refresh-text").textContent;
+        assert(
+          !rs.hidden && /מתעדכן אוטומטית/.test(rsText),
+          `auto-refresh indicator shown (${rsText})`
+        );
+
         // In-app dropdown opens inline and selecting a stop updates the toggle.
         const click = () => new window.MouseEvent("click", { bubbles: true });
         d.getElementById("stop-toggle").dispatchEvent(click());

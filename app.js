@@ -13,6 +13,8 @@ let stops = []; // full bundled dataset
 let nearby = []; // current nearby list
 let selected = null;
 let refreshTimer = null;
+let tickTimer = null;
+let lastUpdated = null;
 
 /* ---------- data loading ---------- */
 
@@ -243,10 +245,36 @@ async function refreshArrivals() {
     renderStopCard(selected, result);
     renderArrivals(result, false);
     showError("");
+    markRefreshed();
   } catch (e) {
     console.error(e);
     showError("לא הצלחנו לטעון זמני אוטובוסים. נסו שוב.");
   }
+}
+
+// Tells the user the list refreshes on its own, so they don't reload the page.
+function updateRefreshStatus() {
+  const box = el("refresh-status");
+  if (!lastUpdated) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  const sec = Math.floor((Date.now() - lastUpdated) / 1000);
+  let ago;
+  if (sec < 5) ago = "עודכן עכשיו";
+  else if (sec < 60) ago = `עודכן לפני ${sec} שניות`;
+  else ago = `עודכן לפני ${Math.floor(sec / 60)} דק׳`;
+  el("refresh-text").textContent = `מתעדכן אוטומטית · ${ago}`;
+}
+
+function markRefreshed() {
+  lastUpdated = Date.now();
+  const box = el("refresh-status");
+  box.classList.remove("flash");
+  void box.offsetWidth; // restart the flash animation
+  box.classList.add("flash");
+  updateRefreshStatus();
 }
 
 function showView(name) {
@@ -284,6 +312,8 @@ function locate() {
         await selectStop(nearby[0]);
         if (refreshTimer) clearInterval(refreshTimer);
         refreshTimer = setInterval(refreshArrivals, REFRESH_MS);
+        if (tickTimer) clearInterval(tickTimer);
+        tickTimer = setInterval(updateRefreshStatus, 1000);
       } catch (e) {
         console.error(e);
         showView("start");
